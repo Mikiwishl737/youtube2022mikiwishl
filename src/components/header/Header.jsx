@@ -3,16 +3,17 @@ import { faBed, faCar, faPerson, faPlane, faTaxi } from "@fortawesome/free-solid
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./header.css";
 import { DateRange } from 'react-date-range';
-import { useState } from "react";
+import { useContext, useState } from "react";
 import 'react-date-range/dist/styles.css'; // main style file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 import {format} from "date-fns"
 import { useNavigate } from "react-router-dom";
+import { SearchContext } from "../../context/SearchContext";
 
 const Header = ({type}) => {
     const [destination, setDestination] = useState("");
     const [openDate, setOpenDate] = useState(false);
-    const [date, setDate] = useState([
+    const [dates, setDates] = useState([
         {
           startDate: new Date(),
           endDate: new Date(),
@@ -26,7 +27,7 @@ const Header = ({type}) => {
        room: 1,
     });
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const handleOption = (name, operation) => {
         setOptions((prev) => {
@@ -37,8 +38,11 @@ const Header = ({type}) => {
         });
     };
 
+    const { dispatch } = useContext(SearchContext);
+
     const handleSearch = () => {
-      navigate("/hotels", { state: { destination, date, options} });
+      dispatch({ type:"NEW_SEARCH", payload: { destination, dates, options } });
+      navigate("/hotels", { state: { destination, dates, options} });
     };
 
     return (
@@ -87,13 +91,13 @@ const Header = ({type}) => {
                 <div className="headerSearchItem">
                   <FontAwesomeIcon icon={faCalendarDays} className="headerIcon" />
                   <span onClick={()=>setOpenDate((!openDate))} className="headerSearchText">{`${format(
-                      date[0].startDate, "MM//dd/yyyy"
-                      )} to ${format(date[0].endDate, "MM//dd/yyyy")}`}</span>
+                      dates[0].startDate, "MM//dd/yyyy"
+                      )} to ${format(dates[0].endDate, "MM//dd/yyyy")}`}</span>
                   {openDate && <DateRange
                     editableDateInputs={true}
-                    onChange={item => setDate([item.selection])}
+                    onChange={item => setDates([item.selection])}
                     moveRangeOnFirstSelection={false}
-                    ranges={date}
+                    ranges={dates}
                     className="date"
                     minDate={new Date()}
                   />}     
